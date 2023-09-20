@@ -27,6 +27,7 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
+    @CrossOrigin
     @PostMapping
     public ResponseEntity<User> saveProduct(@RequestBody User user) {
         return new ResponseEntity<>(userService.save(user), HttpStatus.CREATED);
