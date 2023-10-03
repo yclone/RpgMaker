@@ -6,9 +6,12 @@ import br.com.yclone.RpgMaker.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -21,6 +24,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User save(User any) {
+        if(userRepository.existsByEmail(any.getEmail())){
+            throw new ResponseStatusException(BAD_REQUEST, "cliente já cadastrado");
+        }
         User user = userRepository.save(any);
         return user;
     }
