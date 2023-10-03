@@ -27,8 +27,20 @@ public class UserServiceImpl implements UserService {
         if(userRepository.existsByEmail(any.getEmail())){
             throw new ResponseStatusException(BAD_REQUEST, "cliente já cadastrado");
         }
+
+        // Validar o formato do email
+        if (!isValidEmail(any.getEmail())) {
+            throw new ResponseStatusException(BAD_REQUEST, "Email inválido");
+        }
+
         User user = userRepository.save(any);
         return user;
+    }
+
+    private boolean isValidEmail(String email) {
+        // Utilize uma expressão regular para validar o formato do email
+        String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return email.matches(regex);
     }
 
     @Override
