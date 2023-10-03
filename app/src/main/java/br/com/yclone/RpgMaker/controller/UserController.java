@@ -9,10 +9,13 @@ import lombok.experimental.NonFinal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RestController
 @RequestMapping("/user")
@@ -30,7 +33,15 @@ public class UserController {
     @CrossOrigin
     @PostMapping
     public ResponseEntity<User> saveProduct(@RequestBody User user) {
+        if (!isPasswordSecure(user.getPassword())) {
+            throw new ResponseStatusException(BAD_REQUEST, "A senha não atende aos critérios de segurança.");
+        }
         return new ResponseEntity<>(userService.save(user), HttpStatus.CREATED);
+    }
+
+    private boolean isPasswordSecure(String password) {
+        // Adicione sua lógica de validação de senha aqui, por exemplo, verificar comprimento e caracteres.
+        return password.length() >= 8 && password.matches(".*[a-z].*") && password.matches(".*\\d.*");
     }
 
     @GetMapping
