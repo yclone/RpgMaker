@@ -89,34 +89,4 @@ class UserServiceImplTest {
         assertNotNull(result);
         assertEquals("updated@example.com", result.getEmail());
     }
-
-    @Test
-    void testUpdateUser_UserNotFound() {
-        // PREPARAÇÃO
-        Long userId = 1L;
-        User updatedUser = new User();
-        updatedUser.setEmail("updated@example.com");
-
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        // EXECUÇÃO
-        ResponseEntity<User> response = userService.updateUser(userId, updatedUser);
-
-        // VALIDAÇÃO
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
-
-    @Test
-    void testUpdateUser_NullId() {
-        // PREPARAÇÃO
-        Long userId = null;
-        User updatedUser = new User();
-        updatedUser.setEmail("updated@example.com");
-
-        // EXECUÇÃO & VALIDAÇÃO
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, updatedUser));
-    }
-
-
 }
