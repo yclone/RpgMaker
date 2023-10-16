@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -28,46 +30,48 @@ class UserServiceImplTest {
 
     @Test
     void testSaveUser_ValidUser() {
-        // Arrange
+        // PREPARAÇÃO
         User user = new User();
         user.setEmail("test@example.com");
+        user.setPassword("123ABC123abc");
+
 
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        // Act
+        // EXECUÇÃO
         User savedUser = userService.save(user);
 
-        // Assert
+       // VALIDAÇÃO
         assertNotNull(savedUser);
         assertEquals("test@example.com", savedUser.getEmail());
     }
 
     @Test
     void testSaveUser_DuplicateEmail() {
-        // Arrange
+        // PREPARAÇÃO
         User user = new User();
         user.setEmail("test@example.com");
 
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
-        // Act & Assert
+        // EXECUÇÃO &VALIDAÇÃO
         assertThrows(ResponseStatusException.class, () -> userService.save(user));
     }
 
     @Test
     void testSaveUser_InvalidEmail() {
-        // Arrange
+        // PREPARAÇÃO
         User user = new User();
         user.setEmail("invalid-email");
 
-        // Act & Assert
+        // EXECUÇÃO &VALIDAÇÃO
         assertThrows(ResponseStatusException.class, () -> userService.save(user));
     }
 
     @Test
     void testUpdateUser_ValidUser() {
-        // Arrange
+        // PREPARAÇÃO
         Long userId = 1L;
         User existingUser = new User();
         existingUser.setEmail("existing@example.com");
@@ -78,13 +82,41 @@ class UserServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
         when(userRepository.save(any(User.class))).thenReturn(updatedUser);
 
-        // Act
+        // EXECUÇÃO
         User result = userService.updateUser(userId, updatedUser).getBody();
 
-        // Assert
+       // VALIDAÇÃO
         assertNotNull(result);
         assertEquals("updated@example.com", result.getEmail());
     }
 
-    // Add more test cases for edge cases and additional scenarios as needed
+    @Test
+    void testUpdateUser_UserNotFound() {
+        // PREPARAÇÃO
+        Long userId = 1L;
+        User updatedUser = new User();
+        updatedUser.setEmail("updated@example.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // EXECUÇÃO
+        ResponseEntity<User> response = userService.updateUser(userId, updatedUser);
+
+        // VALIDAÇÃO
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+
+    @Test
+    void testUpdateUser_NullId() {
+        // PREPARAÇÃO
+        Long userId = null;
+        User updatedUser = new User();
+        updatedUser.setEmail("updated@example.com");
+
+        // EXECUÇÃO & VALIDAÇÃO
+        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, updatedUser));
+    }
+
+
 }

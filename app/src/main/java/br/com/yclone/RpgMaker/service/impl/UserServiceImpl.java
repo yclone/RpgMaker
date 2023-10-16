@@ -23,24 +23,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User save(User any) {
-        if(userRepository.existsByEmail(any.getEmail())){
-            throw new ResponseStatusException(BAD_REQUEST, "cliente já cadastrado");
+    public User save(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new ResponseStatusException(BAD_REQUEST, "Cliente já cadastrado");
         }
 
-        // Validar o formato do email
-        if (!isValidEmail(any.getEmail())) {
+        if (!isValidEmail(user.getEmail())) {
             throw new ResponseStatusException(BAD_REQUEST, "Email inválido");
         }
 
-        User user = userRepository.save(any);
-        return user;
+        if (!PasswordUtil.isSecurePassword(user.getPassword())) {
+            throw new ResponseStatusException(BAD_REQUEST, "Senha insegura");
+        }
+
+        User savedUser = userRepository.save(user);
+        return savedUser;
     }
+
 
     private boolean isValidEmail(String email) {
         // Utilize uma expressão regular para validar o formato do email
         String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
         return email.matches(regex);
+    }
+
+    public class PasswordUtil {
+        public static boolean isSecurePassword(String password) {
+            // Implemente aqui a lógica de verificação da força da senha
+            // Por exemplo, verificando comprimento, caracteres especiais, letras maiúsculas, etc.
+            return password.length() >= 8 && password.matches(".*[a-z].*") && password.matches(".*\\d.*");
+        }
     }
 
     @Override
@@ -58,7 +70,11 @@ public class UserServiceImpl implements UserService {
         if (userId == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
-        User existingUser = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(String.valueOf(userId)));
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (!optionalUser.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        User existingUser = optionalUser.get();
         existingUser.setUsername(user.getUsername());
         existingUser.setEmail(user.getEmail());
         existingUser.setNome(user.getNome());
@@ -66,6 +82,4 @@ public class UserServiceImpl implements UserService {
         User savedEntity = userRepository.save(existingUser);
         return ResponseEntity.ok(savedEntity);
     }
-
-
 }

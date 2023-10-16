@@ -36,16 +36,16 @@ class UserControllerTest {
 
     @Test
     void testSaveUser_ValidUser() {
-        // Arrange
+        // PREPARAÇÃO
         User user = new User();
         user.setEmail("test@example.com");
         user.setPassword("sdkjfhsdfskjh!1321321");
         when(userService.save(user)).thenReturn(user);
 
-        // Act
+        //  EXECUÇÃO
         ResponseEntity<User> response = userController.saveProduct(user);
 
-        // Assert
+        //  VALIDAÇÃO
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(user, response.getBody());
@@ -53,17 +53,17 @@ class UserControllerTest {
 
     @Test
     void testGetAllUsers() {
-        // Arrange
+        // PREPARAÇÃO
         List<User> users = new ArrayList<>();
         users.add(new User());
         users.add(new User());
 
         when(userService.getAllUsers()).thenReturn(users);
 
-        // Act
+        //  EXECUÇÃO
         ResponseEntity<Iterable<User>> response = userController.findAll();
 
-        // Assert
+        //  VALIDAÇÃO
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(users, response.getBody());
@@ -71,55 +71,54 @@ class UserControllerTest {
 
     @Test
     void testGetUser_ValidId() {
-        // Arrange
+        // PREPARAÇÃO
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
 
         when(userService.getUserById(userId)).thenReturn(Optional.of(user));
 
-        // Act
-        ResponseEntity<Optional<User>> response = userController.getUser(userId);
+        //  EXECUÇÃO
+        ResponseEntity<User> response = userController.getUser(userId);
 
-        // Assert
+        //  VALIDAÇÃO
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(Optional.of(user), response.getBody());
+        assertEquals(user, response.getBody());
     }
+
 
     @Test
     void testGetUser_InvalidId() {
-        // Arrange
+        // PREPARAÇÃO
         Long userId = 1L;
 
         when(userService.getUserById(userId)).thenReturn(Optional.empty());
 
-        // Act
-        ResponseEntity<Optional<User>> response = userController.getUser(userId);
+        //  EXECUÇÃO
+        ResponseEntity<User> response = userController.getUser(userId);
 
-        // Assert
+        //  VALIDAÇÃO
         assertNotNull(response);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertTrue(response.getBody().isEmpty());
+        assertNull(response.getBody()); // Verifique se o corpo da resposta está nulo
     }
 
     @Test
     void testUpdateUser_ValidUser() {
-        // Arrange
+        // PREPARAÇÃO
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
 
         when(userService.updateUser(userId, user)).thenReturn(ResponseEntity.ok(user));
 
-        // Act
+        //  EXECUÇÃO
         ResponseEntity<User> response = userController.updateUser(userId, user);
 
-        // Assert
+        //  VALIDAÇÃO
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(user, response.getBody());
     }
-
-    // Add more test cases for edge cases and additional scenarios as needed
 }
